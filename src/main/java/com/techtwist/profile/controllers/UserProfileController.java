@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/user-profiles")
@@ -37,10 +38,13 @@ public class UserProfileController {
 
     // List all profiles
     @GetMapping
-    public ResponseEntity<List<TableEntity>> listAllProfiles() {
+    public ResponseEntity<List<UserProfile>> listAllProfiles() {
         try {
-            List<TableEntity> profiles = userProfileService.listAllProfiles();
-            return ResponseEntity.ok(profiles);
+            // Ensure the service returns TableEntity objects
+            List<TableEntity> tableEntities = userProfileService.listAllProfiles();
+            // Convert TableEntity objects to UserProfile objects
+            List<UserProfile> userProfiles = mapToUserProfiles(tableEntities);
+            return ResponseEntity.ok(userProfiles);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
@@ -86,5 +90,12 @@ public class UserProfileController {
             entity.getProperties().putAll(profile.getProperties());
         }
         return entity;
+    }
+
+    // Utility method to map a list of TableEntity to a list of UserProfile
+    private List<UserProfile> mapToUserProfiles(List<TableEntity> entities) {
+        return entities.stream()
+                       .map(this::mapToUserProfile)
+                       .collect(Collectors.toList());
     }
 }
