@@ -5,6 +5,8 @@ import com.techtwist.profile.models.UserProfile;
 import com.techtwist.profile.services.userProfileService;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,29 +26,48 @@ public class UserProfileController {
 
     // Get a profile by partition key and row key
     @GetMapping("/{partitionKey}/{rowKey}")
-    public UserProfile getProfile(@PathVariable String partitionKey, @PathVariable String rowKey) {
-        TableEntity entity = userProfileService.getProfile(partitionKey, rowKey);
-        return mapToUserProfile(entity);
+    public ResponseEntity<UserProfile> getProfile(@PathVariable String partitionKey, @PathVariable String rowKey) {
+        try {
+            TableEntity entity = userProfileService.getProfile(partitionKey, rowKey);
+            return ResponseEntity.ok(mapToUserProfile(entity));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
     }
 
     // List all profiles
     @GetMapping
-    public List<TableEntity> listAllProfiles() {
-        return userProfileService.listAllProfiles();
+    public ResponseEntity<List<TableEntity>> listAllProfiles() {
+        try {
+            List<TableEntity> profiles = userProfileService.listAllProfiles();
+            return ResponseEntity.ok(profiles);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
     }
 
     // Create a new profile
     @PostMapping
-    public void createProfile(@RequestBody UserProfile profile) {
-        TableEntity entity = mapToTableEntity(profile);
-        userProfileService.createProfile(entity);
+    public ResponseEntity<String> createProfile(@RequestBody UserProfile profile) {
+        try {
+            TableEntity entity = mapToTableEntity(profile);
+            userProfileService.createProfile(entity);
+            return ResponseEntity.status(HttpStatus.CREATED).body("Profile created successfully.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to create profile: " + e.getMessage());
+        }
     }
 
     // Update an existing profile
     @PutMapping
-    public void updateProfile(@RequestBody UserProfile profile) {
-        TableEntity entity = mapToTableEntity(profile);
-        userProfileService.updateProfile(entity);
+    public ResponseEntity<String> updateProfile(@RequestBody UserProfile profile) {
+        try {
+            TableEntity entity = mapToTableEntity(profile);
+            userProfileService.updateProfile(entity);
+            return ResponseEntity.ok("Profile updated successfully.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to update profile: " + e.getMessage());
+        }
     }
 
     // Utility method to map TableEntity to UserProfile

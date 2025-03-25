@@ -48,7 +48,11 @@ public class userProfileService {
         if (tableClient == null) {
             throw new IllegalStateException("TableClient is not initialized. Call initialize() first.");
         }
-        tableClient.createEntity(profile);
+        try {
+            tableClient.createEntity(profile);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to create profile: " + e.getMessage(), e);
+        }
     }
 
     // Update an existing profile
@@ -56,25 +60,32 @@ public class userProfileService {
         if (tableClient == null) {
             throw new IllegalStateException("TableClient is not initialized. Call initialize() first.");
         }
-        tableClient.updateEntity(profile);
+        try {
+            tableClient.updateEntity(profile);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to update profile: " + e.getMessage(), e);
+        }
     }
 
     public UserProfile mapToUserProfile(TableEntity entity) {
-        UserProfile profile = new UserProfile();
-        profile.setPartitionKey(entity.getPartitionKey());
-        profile.setRowId(entity.getRowKey());
-        profile.setFirstName(entity.getProperties().get("firstName").toString());
-        profile.setLastName(entity.getProperties().get("lastName").toString());
-        profile.setEmail(entity.getProperties().get("email").toString());
-        profile.setAddressLine1(entity.getProperties().get("addressLine1").toString());
-        profile.setAddressLine2(entity.getProperties().get("addressLine2").toString());
-        profile.setCity(entity.getProperties().get("city").toString());
-        profile.setState(entity.getProperties().get("state").toString());
-        profile.setZipCode(entity.getProperties().get("zipCode").toString());
-        profile.setCountry(entity.getProperties().get("country").toString());
-        profile.setProperties(entity.getProperties());
-
-        return profile;
+        try {
+            UserProfile profile = new UserProfile();
+            profile.setPartitionKey(entity.getPartitionKey());
+            profile.setRowId(entity.getRowKey());
+            profile.setFirstName(entity.getProperties().get("firstName").toString());
+            profile.setLastName(entity.getProperties().get("lastName").toString());
+            profile.setEmail(entity.getProperties().get("email").toString());
+            profile.setAddressLine1(entity.getProperties().get("addressLine1").toString());
+            profile.setAddressLine2(entity.getProperties().get("addressLine2").toString());
+            profile.setCity(entity.getProperties().get("city").toString());
+            profile.setState(entity.getProperties().get("state").toString());
+            profile.setZipCode(entity.getProperties().get("zipCode").toString());
+            profile.setCountry(entity.getProperties().get("country").toString());
+            profile.setProperties(entity.getProperties());
+            return profile;
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to map TableEntity to UserProfile: " + e.getMessage(), e);
+        }
     }
 
     public Map<String, Object> mapToTableEntity(UserProfile profile) {
