@@ -3,9 +3,9 @@ package com.techtwist.profile.services;
 import com.azure.data.tables.TableClient;
 import com.azure.data.tables.TableClientBuilder;
 import com.azure.data.tables.models.TableEntity;
-import com.azure.data.tables.models.TableTransactionAction;
-import com.azure.data.tables.models.TableTransactionActionType;
 import com.techtwist.profile.models.UserProfile;
+
+import jakarta.annotation.PostConstruct;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,12 +17,16 @@ import org.springframework.stereotype.Service;
 public class userProfileService {
     private TableClient tableClient;
 
-    // Initialize the connection to Azure Table Storage
-    public void initialize(String connectionString, String tableName) {
+    private final String accountName = System.getenv("DEV_ACCOUNTNAME");
+    private final String accountKey = System.getenv("DEV_ACCOUNTKEY");
+    private final String tableName = System.getenv("DEV_TABLENAME");
+
+    @PostConstruct
+    public void init() {
         tableClient = new TableClientBuilder()
-            .connectionString(connectionString)
-            .tableName(tableName)
-            .buildClient();
+                .connectionString(String.format("DefaultEndpointsProtocol=https;AccountName=%s;AccountKey=%s;TableEndpoint=https://%s.table.core.windows.net;", accountName, accountKey, accountName))
+                .tableName(tableName)
+                .buildClient();
     }
 
     // Fetch profile information by partition key and row key
