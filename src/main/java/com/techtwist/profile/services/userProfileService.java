@@ -17,9 +17,9 @@ import org.springframework.stereotype.Service;
 public class userProfileService {
     private TableClient tableClient;
 
-    private final String accountName = System.getenv("DEV_ACCOUNTNAME");
-    private final String accountKey = System.getenv("DEV_ACCOUNTKEY");
-    private final String tableName = System.getenv("DEV_TABLENAME");
+    private final String accountName = System.getenv("ACCOUNTNAME");
+    private final String accountKey = System.getenv("ACCOUNTKEY");
+    private final String tableName = System.getenv("TABLENAME");
 
     @PostConstruct
     public void init() {
