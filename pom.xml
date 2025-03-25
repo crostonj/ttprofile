@@ -31,6 +31,13 @@
 		<spring-cloud-azure.version>5.21.0</spring-cloud-azure.version>
 	</properties>
 	<dependencies>
+
+		<dependency>
+			<groupId>com.azure</groupId>
+			<artifactId>azure-data-tables</artifactId>
+			<version>12.5.3</version>
+		</dependency>
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
