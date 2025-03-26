@@ -92,7 +92,7 @@ public class userProfileService {
         }
     }
 
-    public Map<String, Object> mapToTableEntity(UserProfile profile) {
+    public TableEntity mapToTableEntity(UserProfile profile) {
         TableEntity entity = new TableEntity(profile.getPartitionKey(), profile.getRowId());
         entity.getProperties().put("firstName", profile.getFirstName());
         entity.getProperties().put("lastName", profile.getLastName());
@@ -106,6 +106,6 @@ public class userProfileService {
         if (profile.getProperties() != null) {
             entity.getProperties().putAll(profile.getProperties());
         }
-        return entity.getProperties();
+        return entity;
     }
 }

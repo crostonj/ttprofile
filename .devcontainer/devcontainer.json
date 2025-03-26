@@ -11,11 +11,11 @@
 			"installMaven": "true",
 			"installGradle": "false"
 		},
-		"ghcr.io/devcontainers-extra/features/springboot-sdkman:2": {},
-		"containerEnv": {
-			"ACCOUNTNAME": "techtwistdatastorage",
-			"TABLENAME": "UserProfile"
-		}
+		"ghcr.io/devcontainers-extra/features/springboot-sdkman:2": {}
+	},
+	"containerEnv": {
+		"ACCOUNTNAME": "techtwistdatastorage",
+		"TABLENAME": "UserProfile"
 	}
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
