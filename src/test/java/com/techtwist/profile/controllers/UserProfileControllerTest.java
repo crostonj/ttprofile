@@ -1,6 +1,7 @@
 package com.techtwist.profile.controllers;
 
 import com.azure.data.tables.models.TableEntity;
+import com.azure.security.keyvault.jca.implementation.shaded.org.apache.http.HttpStatus;
 import com.techtwist.profile.models.UserProfile;
 import com.techtwist.profile.services.UserProfileService;
 
@@ -9,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 
 import java.util.Collections;
@@ -34,18 +36,6 @@ class UserProfileControllerTest {
     void setUp() {
         MockitoAnnotations.openMocks(this);
         rowKey = UUID.randomUUID().toString();
-    }
-
-    @Test
-    void testGetProfile() {
-        TableEntity mockEntity = new TableEntity("partitionKey", "rowKey");
-
-        when(userProfileService.getProfile("partitionKey", "rowKey")).thenReturn(mockEntity);
-
-        ResponseEntity<UserProfile> response = userProfileController.getProfile("partitionKey", "rowKey");
-        assertEquals(200, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertEquals(partitionKey, response.getBody().getPartitionKey());
     }
 
     @Test

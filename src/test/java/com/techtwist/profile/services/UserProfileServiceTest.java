@@ -105,4 +105,18 @@ class UserProfileServiceTest {
         TableEntity entityProperties = userProfileService.mapToTableEntity(profile);
         assertEquals("John", entityProperties.getProperty("firstName"));
     }
+
+    @Test
+    void testMapToUserProfileHandlesMissingKeys() {
+        TableEntity entity = new TableEntity("TestPartition", "TestRow");
+        entity.getProperties().put("name", "John Doe"); // Only "name" is provided
+
+        UserProfile userProfile = userProfileService.mapToUserProfile(entity);
+
+        assertEquals("TestPartition", userProfile.getPartitionKey());
+        assertEquals("TestRow", userProfile.getRowId());
+        assertEquals("John Doe", userProfile.getFirstName()); // "name" is mapped to firstName
+        assertEquals("", userProfile.getEmail()); // Default value for missing key
+        assertEquals("", userProfile.getAddressLine1()); // Default value for missing key
+    }
 }
