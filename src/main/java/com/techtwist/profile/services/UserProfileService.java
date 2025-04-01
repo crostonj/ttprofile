@@ -14,7 +14,7 @@ import java.util.Map;
 import org.springframework.stereotype.Service;
 
 @Service
-public class userProfileService {
+public class UserProfileService {
     private TableClient tableClient;
 
     private final String accountName = System.getenv("ACCOUNTNAME");
@@ -34,7 +34,11 @@ public class userProfileService {
         if (tableClient == null) {
             throw new IllegalStateException("TableClient is not initialized. Call initialize() first.");
         }
-        return tableClient.getEntity(partitionKey, rowKey);
+        TableEntity entity = tableClient.getEntity(partitionKey, rowKey);
+        if (entity.getProperties() == null || entity.getProperties().isEmpty()) {
+            throw new RuntimeException("Retrieved entity has no properties.");
+        }
+        return entity;
     }
 
     // Fetch all profiles from the table
@@ -76,15 +80,15 @@ public class userProfileService {
             UserProfile profile = new UserProfile();
             profile.setPartitionKey(entity.getPartitionKey());
             profile.setRowId(entity.getRowKey());
-            profile.setFirstName(entity.getProperties().get("firstName").toString());
-            profile.setLastName(entity.getProperties().get("lastName").toString());
-            profile.setEmail(entity.getProperties().get("email").toString());
-            profile.setAddressLine1(entity.getProperties().get("addressLine1").toString());
-            profile.setAddressLine2(entity.getProperties().get("addressLine2").toString());
-            profile.setCity(entity.getProperties().get("city").toString());
-            profile.setState(entity.getProperties().get("state").toString());
-            profile.setZipCode(entity.getProperties().get("zipCode").toString());
-            profile.setCountry(entity.getProperties().get("country").toString());
+            profile.setFirstName(entity.getProperties().get("firstName") != null ? entity.getProperties().get("firstName").toString() : null);
+            profile.setLastName(entity.getProperties().get("lastName") != null ? entity.getProperties().get("lastName").toString() : null);
+            profile.setEmail(entity.getProperties().get("email") != null ? entity.getProperties().get("email").toString() : null);
+            profile.setAddressLine1(entity.getProperties().get("addressLine1") != null ? entity.getProperties().get("addressLine1").toString() : null);
+            profile.setAddressLine2(entity.getProperties().get("addressLine2") != null ? entity.getProperties().get("addressLine2").toString() : null);
+            profile.setCity(entity.getProperties().get("city") != null ? entity.getProperties().get("city").toString() : null);
+            profile.setState(entity.getProperties().get("state") != null ? entity.getProperties().get("state").toString() : null);
+            profile.setZipCode(entity.getProperties().get("zipCode") != null ? entity.getProperties().get("zipCode").toString() : null);
+            profile.setCountry(entity.getProperties().get("country") != null ? entity.getProperties().get("country").toString() : null);
             profile.setProperties(entity.getProperties());
             return profile;
         } catch (Exception e) {

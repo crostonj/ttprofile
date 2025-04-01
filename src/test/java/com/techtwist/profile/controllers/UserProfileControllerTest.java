@@ -2,7 +2,8 @@ package com.techtwist.profile.controllers;
 
 import com.azure.data.tables.models.TableEntity;
 import com.techtwist.profile.models.UserProfile;
-import com.techtwist.profile.services.userProfileService;
+import com.techtwist.profile.services.UserProfileService;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -12,21 +13,27 @@ import org.springframework.http.ResponseEntity;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 class UserProfileControllerTest {
 
     @Mock
-    private userProfileService userProfileService;
+    private UserProfileService userProfileService;
 
     @InjectMocks
     private UserProfileController userProfileController;
+    
+    private String rowKey;
+    private String partitionKey = "TestCompany";
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
+        rowKey = UUID.randomUUID().toString();
     }
 
     @Test
@@ -38,7 +45,7 @@ class UserProfileControllerTest {
         ResponseEntity<UserProfile> response = userProfileController.getProfile("partitionKey", "rowKey");
         assertEquals(200, response.getStatusCode());
         assertNotNull(response.getBody());
-        assertEquals("partitionKey", response.getBody().getPartitionKey());
+        assertEquals(partitionKey, response.getBody().getPartitionKey());
     }
 
     @Test
@@ -54,8 +61,8 @@ class UserProfileControllerTest {
     @Test
     void testCreateProfile() {
         UserProfile mockProfile = new UserProfile();
-        mockProfile.setPartitionKey("partitionKey");
-        mockProfile.setRowId("rowKey");
+        mockProfile.setPartitionKey(partitionKey);
+        mockProfile.setRowId(rowKey);
 
         doNothing().when(userProfileService).createProfile(any());
 
@@ -67,8 +74,8 @@ class UserProfileControllerTest {
     @Test
     void testUpdateProfile() {
         UserProfile mockProfile = new UserProfile();
-        mockProfile.setPartitionKey("partitionKey");
-        mockProfile.setRowId("rowKey");
+        mockProfile.setPartitionKey(partitionKey);
+        mockProfile.setRowId(rowKey);
 
         doNothing().when(userProfileService).updateProfile(any());
 

@@ -2,7 +2,7 @@ package com.techtwist.profile.controllers;
 
 import com.azure.data.tables.models.TableEntity;
 import com.techtwist.profile.models.UserProfile;
-import com.techtwist.profile.services.userProfileService;
+import com.techtwist.profile.services.UserProfileService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 public class UserProfileController {
 
     @Autowired
-    private userProfileService userProfileService;
+    private UserProfileService userProfileService;
 
     @Operation(summary = "Get a user profile", description = "Retrieve a user profile by partition key and row key")
     @GetMapping("/{partitionKey}/{rowKey}")
