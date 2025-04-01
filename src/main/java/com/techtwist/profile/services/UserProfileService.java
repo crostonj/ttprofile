@@ -22,11 +22,14 @@ public class UserProfileService {
     private final String tableName = System.getenv("TABLENAME");
 
     @PostConstruct
-    public void init() {
-        tableClient = new TableClientBuilder()
-                .connectionString(String.format("DefaultEndpointsProtocol=https;AccountName=%s;AccountKey=%s;TableEndpoint=https://%s.table.core.windows.net;", accountName, accountKey, accountName))
-                .tableName(tableName)
-                .buildClient();
+    public void initialize() {
+  
+        if (tableClient == null) {
+            tableClient = new TableClientBuilder()
+                    .connectionString(String.format("DefaultEndpointsProtocol=https;AccountName=%s;AccountKey=%s;TableEndpoint=https://%s.table.core.windows.net;", accountName, accountKey, accountName))
+                    .tableName(tableName)
+                    .buildClient();
+        }
     }
 
     // Fetch profile information by partition key and row key
