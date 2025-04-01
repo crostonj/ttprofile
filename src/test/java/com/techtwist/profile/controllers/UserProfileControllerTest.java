@@ -43,7 +43,7 @@ class UserProfileControllerTest {
         when(userProfileService.listAllProfiles()).thenReturn(Collections.emptyList());
 
         ResponseEntity<List<UserProfile>> response = userProfileController.listAllProfiles();
-        assertEquals(200, response.getStatusCode());
+        assertEquals(200, response.getStatusCode().value());
         assertNotNull(response.getBody());
         assertTrue(response.getBody().isEmpty());
     }
@@ -57,7 +57,7 @@ class UserProfileControllerTest {
         doNothing().when(userProfileService).createProfile(any());
 
         ResponseEntity<String> response = userProfileController.createProfile(mockProfile);
-        assertEquals(201, response.getStatusCode());
+        assertEquals(201, response.getStatusCode().value());
         assertEquals("Profile created successfully.", response.getBody());
     }
 
@@ -70,7 +70,7 @@ class UserProfileControllerTest {
         doNothing().when(userProfileService).updateProfile(any());
 
         ResponseEntity<String> response = userProfileController.updateProfile(mockProfile);
-        assertEquals(200, response.getStatusCode());
+        assertEquals(200, response.getStatusCode().value());
         assertEquals("Profile updated successfully.", response.getBody());
     }
 }
