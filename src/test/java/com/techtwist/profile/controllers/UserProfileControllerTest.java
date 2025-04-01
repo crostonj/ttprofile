@@ -1,7 +1,5 @@
 package com.techtwist.profile.controllers;
 
-import com.azure.data.tables.models.TableEntity;
-import com.azure.security.keyvault.jca.implementation.shaded.org.apache.http.HttpStatus;
 import com.techtwist.profile.models.UserProfile;
 import com.techtwist.profile.services.UserProfileService;
 
@@ -10,7 +8,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 
 import java.util.Collections;

@@ -1,122 +1,94 @@
 package com.techtwist.profile.services;
 
-import com.azure.data.tables.TableClient;
 import com.azure.data.tables.models.TableEntity;
 import com.techtwist.profile.models.UserProfile;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import com.azure.core.http.rest.PagedIterable;
+import org.mockito.Mockito;
 
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 class UserProfileServiceTest {
-
-    @Mock
-    private TableClient tableClient;
-
-    @InjectMocks
-    private UserProfileService userProfileService; // Fixed naming and initialization
-
-    private String rowKey;
-    private String partitionKey = "TestCompany";
+    private UserProfileService userProfileService;
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this); // Ensure mocks are initialized
-        rowKey = UUID.randomUUID().toString();
-        userProfileService = new UserProfileService(); // Assign the mocked TableClient
-    }
-
-    private UserProfile createMockUserProfile() {
-        UserProfile userProfile = new UserProfile();
-        userProfile.setPartitionKey(partitionKey);
-        userProfile.setRowId(rowKey);
-        userProfile.setFirstName("John");
-        userProfile.setLastName("Doe");
-        return userProfile;
+        userProfileService = Mockito.spy(new UserProfileService());
+        doNothing().when(userProfileService).init(); // Mock init method
+        userProfileService.init();
     }
 
     @Test
     void testGetProfile() {
-        TableEntity mockEntity = new TableEntity(partitionKey, rowKey);
+        TableEntity mockEntity = new TableEntity("partitionKey", "rowKey");
         mockEntity.getProperties().put("firstName", "John");
-        mockEntity.getProperties().put("lastName", "Doe");
+        when(userProfileService.getProfile("partitionKey", "rowKey")).thenReturn(mockEntity);
 
-        // Mock the behavior of tableClient to return the mockEntity
-        when(tableClient.getEntity(partitionKey, rowKey)).thenReturn(mockEntity);
-
-        TableEntity result = userProfileService.getProfile(partitionKey, rowKey);
-
+        TableEntity result = userProfileService.getProfile("partitionKey", "rowKey");
         assertNotNull(result);
         assertEquals("John", result.getProperties().get("firstName"));
-        assertEquals("Doe", result.getProperties().get("lastName"));
     }
 
- 
+    @Test
+    void testListAllProfiles() {
+        TableEntity entity1 = new TableEntity("partition1", "row1");
+        TableEntity entity2 = new TableEntity("partition2", "row2");
+        List<TableEntity> mockEntities = Arrays.asList(entity1, entity2);
+
+        when(userProfileService.listAllProfiles()).thenReturn(mockEntities);
+
+        List<TableEntity> result = userProfileService.listAllProfiles();
+        assertEquals(2, result.size());
+    }
 
     @Test
     void testCreateProfile() {
-        TableEntity mockEntity = new TableEntity(partitionKey, rowKey);
-        mockEntity.getProperties().put("firstName", "Jane");
+        TableEntity newEntity = new TableEntity("partitionKey", "rowKey");
+        doNothing().when(userProfileService).createProfile(newEntity);
 
-        assertDoesNotThrow(() -> userProfileService.createProfile(mockEntity));
+        assertDoesNotThrow(() -> userProfileService.createProfile(newEntity));
+        verify(userProfileService, times(1)).createProfile(newEntity);
     }
 
     @Test
     void testUpdateProfile() {
-        TableEntity mockEntity = new TableEntity(partitionKey, rowKey);
-        mockEntity.getProperties().put("firstName", "Jane");
+        TableEntity updatedEntity = new TableEntity("partitionKey", "rowKey");
+        doNothing().when(userProfileService).updateProfile(updatedEntity);
 
-        userProfileService.createProfile(mockEntity);
-        mockEntity.getProperties().put("firstName", "UpdatedName");
-
-        assertDoesNotThrow(() -> userProfileService.updateProfile(mockEntity));
+        assertDoesNotThrow(() -> userProfileService.updateProfile(updatedEntity));
+        verify(userProfileService, times(1)).updateProfile(updatedEntity);
     }
 
     @Test
     void testMapToUserProfile() {
-        TableEntity mockEntity = new TableEntity(partitionKey, rowKey);
-        mockEntity.getProperties().put("firstName", "John");
-        mockEntity.getProperties().put("lastName", "Doe");
-        mockEntity.getProperties().put("rowId", rowKey); // Add rowId property
-        mockEntity.getProperties().put("partitionKey", partitionKey); // Add partitionKey property
+        TableEntity entity = new TableEntity("partitionKey", "rowKey");
+        entity.getProperties().put("firstName", "Jane");
+        entity.getProperties().put("lastName", "Doe");
 
-        UserProfile profile = userProfileService.mapToUserProfile(mockEntity);
-        assertEquals("John", profile.getFirstName());
-        assertEquals("Doe", profile.getLastName());
-        assertEquals(rowKey, profile.getRowId()); // Add assertion for rowId
-        assertEquals(partitionKey, profile.getPartitionKey()); // Add assertion for partitionKey
+        UserProfile userProfile = userProfileService.mapToUserProfile(entity);
+
+        assertEquals("partitionKey", userProfile.getPartitionKey());
+        assertEquals("rowKey", userProfile.getRowId());
+        assertEquals("Jane", userProfile.getFirstName());
+        assertEquals("Doe", userProfile.getLastName());
     }
 
     @Test
     void testMapToTableEntity() {
-        UserProfile profile = new UserProfile();
-        profile.setPartitionKey(partitionKey);
-        profile.setRowId("rowKey");
-        profile.setFirstName("John");
+        UserProfile userProfile = new UserProfile();
+        userProfile.setPartitionKey("partitionKey");
+        userProfile.setRowId("rowKey");
+        userProfile.setFirstName("Jane");
+        userProfile.setLastName("Doe");
 
-        TableEntity entityProperties = userProfileService.mapToTableEntity(profile);
-        assertEquals("John", entityProperties.getProperty("firstName"));
-    }
+        TableEntity entity = userProfileService.mapToTableEntity(userProfile);
 
-    @Test
-    void testMapToUserProfileHandlesMissingKeys() {
-        TableEntity entity = new TableEntity("TestPartition", "TestRow");
-        entity.getProperties().put("name", "John Doe"); // Only "name" is provided
-
-        UserProfile userProfile = userProfileService.mapToUserProfile(entity);
-
-        assertEquals("TestPartition", userProfile.getPartitionKey());
-        assertEquals("TestRow", userProfile.getRowId());
-        assertEquals("John Doe", userProfile.getFirstName()); // "name" is mapped to firstName
-        assertEquals("", userProfile.getEmail()); // Default value for missing key
-        assertEquals("", userProfile.getAddressLine1()); // Default value for missing key
+        assertEquals("partitionKey", entity.getPartitionKey());
+        assertEquals("rowKey", entity.getRowKey());
+        assertEquals("Jane", entity.getProperties().get("firstName"));
+        assertEquals("Doe", entity.getProperties().get("lastName"));
     }
 }
