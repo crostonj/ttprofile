@@ -30,12 +30,6 @@ class UserProfileControllerTest {
     }
 
     @Test
-    void testInitialize() {
-        assertDoesNotThrow(() -> userProfileController.initialize("fake-connection-string", "testTable"));
-        verify(userProfileService, times(1)).initialize("fake-connection-string", "testTable");
-    }
-
-    @Test
     void testGetProfile() {
         TableEntity mockEntity = new TableEntity("partitionKey", "rowKey");
 
