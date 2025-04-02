@@ -9,8 +9,8 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.techtwist</groupId>
-	<artifactId>profile</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<artifactId>Profile</artifactId>
+	<version>1.0</version>
 	<name>profile</name>
 	<description>Demo project for Spring Boot</description>
 	<url/>
