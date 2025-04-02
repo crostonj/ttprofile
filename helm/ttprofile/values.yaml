@@ -1,0 +1,32 @@
+apiVersion: v1
+appVersion: "1.0"
+description: A Helm chart for deploying my service
+name: techtwist-profile
+version: 0.1.0
+
+replicaCount: 1
+
+image:
+  repository: crostonj/techtwist-profile
+  tag: "latest"  # or use a version like "1.0.0"
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 8080
+
+ingress:
+  enabled: false
+  path: /
+  hosts:
+    - host: chart-example.local
+      paths:
+        - /
+
+resources: {}
+  
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
