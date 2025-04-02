@@ -9,7 +9,8 @@
 		"ghcr.io/devcontainers/features/java:1": {},
 		"ghcr.io/devcontainers-extra/features/springboot-sdkman:2": {},
 		"ghcr.io/rjfmachado/devcontainer-features/cloud-native:1": {},
-		"ghcr.io/schlich/devcontainer-features/helmfile:1": {}
+		"ghcr.io/schlich/devcontainer-features/helmfile:1": {},
+		"ghcr.io/rio/features/skaffold:2": {}
 	},
 	"containerEnv": {
 		"ACCOUNTNAME": "techtwistdatastorage",
