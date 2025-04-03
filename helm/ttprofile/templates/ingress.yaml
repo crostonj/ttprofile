@@ -2,7 +2,7 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-    name: simpleapi-ingress
+    name: {{ .Release.Name }}-ingress
     namespace: {{ .Values.namespace }}
     annotations:
         {{- if .Values.ingress.annotations }}
@@ -20,7 +20,7 @@ spec:
           pathType: Prefix
           backend:
             service:
-                name: simpleapi
+                name: {{ .Values.service.name }}
                 port:
                     number: 80
 {{- end }}
