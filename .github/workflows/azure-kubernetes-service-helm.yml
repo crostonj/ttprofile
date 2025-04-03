@@ -40,7 +40,7 @@ on:
   workflow_dispatch:
 
 env:
-  CONTAINER_REGISTRY: "docker.io"
+  CONTAINER_REGISTRY: "crostonj"
   CONTAINER_NAME: "crostonj/techtwist-profile:latest"
   RESOURCE_GROUP: "croston-rg1"
   CLUSTER_NAME: "crostonaks001"
@@ -49,24 +49,32 @@ env:
 
 jobs:
   buildImage:
-    permissions:
-      contents: read
-      id-token: write
+
     runs-on: ubuntu-latest
+
     steps:
-      # Checks out the repository this file is in
-      - uses: actions/checkout@v4
+    - uses: actions/checkout@v4
+    - name: Set up environment variables
+      run: echo "IMAGE_TAG=crostonj/techtwist-profile:latest" >> $GITHUB_ENV
 
-      # Logs in with your Azure credentials
-      - name: Azure login
-        uses: azure/login@v1.4.6
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
+    - name: Build the Docker image
+      run: docker build . --file ./Dockerfile --tag ${{ env.IMAGE_TAG }}
 
-      # Builds and pushes an image up to your Azure Container Registry
-      - name: Build and push image to ACR
-        run: |
-          az acr build --image ${{ env.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ env.CONTAINER_NAME }}:${{ github.sha }} --registry ${{ env.AZURE_CONTAINER_REGISTRY }} -g ${{ env.RESOURCE_GROUP }} .
+    - name: Log in to Docker Hub 
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+    - name: Push the Docker image 
+      run: docker push ${{ env.IMAGE_TAG }}
+      env:
+        DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+        DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+    - name: Log out from Docker Hub
+      run: docker logout
+      env:
+        DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+        DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
 
   deploy:
     permissions:
@@ -83,10 +91,7 @@ jobs:
       - name: Azure login
         uses: azure/login@v1.4.6
         with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       # Use kubelogin to configure your kubeconfig for Azure auth
       - name: Set up kubelogin for non-interactive login
@@ -122,4 +127,4 @@ jobs:
           action: deploy
           manifests: ${{ steps.bake.outputs.manifestsBundle }}
           images: |
-            ${{ env.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ env.CONTAINER_NAME }}:${{ github.sha }}
+            docker.io/${{ env.CONTAINER_NAME }}:${{ github.sha }}
