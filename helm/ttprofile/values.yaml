@@ -16,7 +16,7 @@ service:
   port: 8080
 
 ingress:
-  enabled: false
+  enabled: true
   path: /
   hosts:
     - host: chart-example.local

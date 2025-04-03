@@ -6,13 +6,12 @@
 	"image": "mcr.microsoft.com/devcontainers/java:1-21-bullseye",
 
 	"features": {
-		"ghcr.io/devcontainers/features/java:1": {},
-		"ghcr.io/devcontainers-extra/features/springboot-sdkman:2": {},
+		"ghcr.io/devcontainers/features/java:1": {
+			"version": "none",
+			"installMaven": "true",
+			"installGradle": "false"
+		},
 		"ghcr.io/rjfmachado/devcontainer-features/cloud-native:1": {}
-	},
-	"containerEnv": {
-		"ACCOUNTNAME": "techtwistdatastorage",
-		"TABLENAME": "UserProfile"
 	}
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
