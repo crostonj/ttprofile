@@ -19,7 +19,7 @@ ingress:
   enabled: true
   path: /
   hosts:
-    - host: chart-example.local
+    - host: TechTwistProfile.local
       paths:
         - /
 

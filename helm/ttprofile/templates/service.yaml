@@ -1,13 +1,13 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "my-service.fullname" . }}
+  name: {{ include "TechTwist.Profile" . }}
   labels:
-    app: {{ include "my-service.name" . }}
+    app: {{ include "TechTwist.Profile" . }}
 spec:
   type: {{ .Values.service.type }}
   ports:
     - port: {{ .Values.service.port }}
       targetPort: {{ .Values.service.targetPort }}
   selector:
-    app: {{ include "my-service.name" . }}
+    app: {{ include "TechTwist.Profile" . }}
