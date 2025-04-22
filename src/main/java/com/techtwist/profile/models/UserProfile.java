@@ -23,4 +23,8 @@ public class UserProfile {
     private String rowKey;
     private String partitionKey;
     private Map<String, Object> properties;
+
+    public static String generateKey(String partitionKey, String rowKey) {
+        return partitionKey + ":" + rowKey;
+    }
 }

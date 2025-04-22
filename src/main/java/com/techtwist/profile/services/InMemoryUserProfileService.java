@@ -43,7 +43,7 @@ public class InMemoryUserProfileService implements IUserProfileService {
 
     @Override
     public void createProfile(UserProfile entity) {
-        String key = generateKey(entity.getPartitionKey(), entity.getRowKey());
+        String key =  UserProfile.generateKey(entity.getPartitionKey(), entity.getRowKey());
         if (inMemoryStore.containsKey(key)) {
             throw new IllegalArgumentException("Profile already exists with the given partitionKey and rowKey.");
         }
@@ -52,7 +52,7 @@ public class InMemoryUserProfileService implements IUserProfileService {
 
     @Override
     public void updateProfile(UserProfile entity) {
-        String key = generateKey(entity.getPartitionKey(), entity.getRowKey());
+        String key = UserProfile.generateKey(entity.getPartitionKey(), entity.getRowKey());
         if (!inMemoryStore.containsKey(key)) {
             throw new IllegalArgumentException("Profile does not exist with the given partitionKey and rowKey.");
         }
@@ -65,9 +65,7 @@ public class InMemoryUserProfileService implements IUserProfileService {
         return users;
     }
 
-    private String generateKey(String partitionKey, String rowKey) {
-        return partitionKey + ":" + rowKey;
-    }
+
 
     @Override
     public void initialize() {
@@ -85,7 +83,7 @@ public class InMemoryUserProfileService implements IUserProfileService {
             entity.getProperties().put("country", "Country " + i);
             entity.setRowKey(rowKey);
             entity.setPartitionKey(partitionKey);
-            inMemoryStore.put(generateKey(partitionKey, rowKey), entity);
+            inMemoryStore.put( UserProfile.generateKey(partitionKey, rowKey), entity);
         }
     }
 

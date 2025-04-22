@@ -1,6 +1,5 @@
 package com.techtwist.profile.services;
 
-import com.azure.data.tables.models.TableEntity;
 import com.techtwist.profile.models.UserProfile;
 import com.techtwist.profile.services.interfaces.IUserProfileService;
 
@@ -16,8 +15,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 class UserProfileServiceTest {
-    // Mocking the UserProfileService class
-
     @Qualifier("inMemoryUserProfileService") // Explicitly name the mock to match the qualifier
     private IUserProfileService userProfileService;
 
@@ -27,76 +24,77 @@ class UserProfileServiceTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        rowKey = UUID.randomUUID().toString()    }
-
-   // @Test
-    void testGetProfile() {
-        TableEntity mockEntity = new TableEntity("partitionKey", "rowKey");
-        mockEntity.getProperties().put("firstName", "John");
-        when(userProfileService.getProfile("partitionKey", "rowKey")).thenReturn(mockEntity);
-
-        TableEntity result = userProfileService.getProfile("partitionKey", "rowKey");
-        assertNotNull(result);
-        assertEquals("John", result.getProperties().get("firstName"));
+        rowKey = UUID.randomUUID().toString();
+        userProfileService = Mockito.mock(IUserProfileService.class);
     }
 
-   // @Test
+    @Test
+    void testGetProfile() {
+        String key = UserProfile.generateKey(partitionKey, rowKey);
+
+        // Mocking a UserProfile
+        UserProfile userProfile = new UserProfile();
+        userProfile.setFirstName("John");
+        userProfile.setLastName("Doe");
+        userProfile.setEmail("john.doe@example.com");
+        userProfile.setAddressLine1("123 Main St");
+        userProfile.setAddressLine2("Apt 4B");
+        userProfile.setCity("Springfield");
+        userProfile.setState("IL");
+        userProfile.setZipCode("62704");
+        userProfile.setCountry("USA");
+        userProfile.setPartitionKey(partitionKey);
+        userProfile.setRowKey(rowKey);
+
+        when(userProfileService.getProfile(key)).thenReturn(userProfile);
+
+        UserProfile result = userProfileService.getProfile(key);
+        assertNotNull(result);
+        assertEquals("John", result.getFirstName());
+        assertEquals("Doe", result.getLastName());
+    }
+
+    @Test
     void testListAllProfiles() {
-        TableEntity entity1 = new TableEntity("partition1", "row1");
-        TableEntity entity2 = new TableEntity("partition2", "row2");
-        List<TableEntity> mockEntities = Arrays.asList(entity1, entity2);
+        UserProfile profile1 = new UserProfile();
+        profile1.setPartitionKey("partition1");
+        profile1.setRowKey("row1");
 
-        when(userProfileService.listAllProfiles()).thenReturn(mockEntities);
+        UserProfile profile2 = new UserProfile();
+        profile2.setPartitionKey("partition2");
+        profile2.setRowKey("row2");
 
-        List<TableEntity> result = userProfileService.listAllProfiles();
+        List<UserProfile> mockProfiles = Arrays.asList(profile1, profile2);
+
+        when(userProfileService.listAllProfiles()).thenReturn(mockProfiles);
+
+        List<UserProfile> result = userProfileService.listAllProfiles();
         assertEquals(2, result.size());
+        assertEquals("partition1", result.get(0).getPartitionKey());
+        assertEquals("row1", result.get(0).getRowKey());
     }
 
     @Test
     void testCreateProfile() {
-        TableEntity newEntity = new TableEntity("partitionKey", "rowKey");
-        doNothing().when(userProfileService).createProfile(newEntity);
+        UserProfile newProfile = new UserProfile();
+        newProfile.setPartitionKey("partitionKey");
+        newProfile.setRowKey("rowKey");
 
-        assertDoesNotThrow(() -> userProfileService.createProfile(newEntity));
-        verify(userProfileService, times(1)).createProfile(newEntity);
+        doNothing().when(userProfileService).createProfile(newProfile);
+
+        assertDoesNotThrow(() -> userProfileService.createProfile(newProfile));
+        verify(userProfileService, times(1)).createProfile(newProfile);
     }
 
     @Test
     void testUpdateProfile() {
-        TableEntity updatedEntity = new TableEntity("partitionKey", "rowKey");
-        doNothing().when(userProfileService).updateProfile(updatedEntity);
+        UserProfile updatedProfile = new UserProfile();
+        updatedProfile.setPartitionKey("partitionKey");
+        updatedProfile.setRowKey("rowKey");
 
-        assertDoesNotThrow(() -> userProfileService.updateProfile(updatedEntity));
-        verify(userProfileService, times(1)).updateProfile(updatedEntity);
-    }
+        doNothing().when(userProfileService).updateProfile(updatedProfile);
 
-    @Test
-    void testMapToUserProfile() {
-        TableEntity entity = new TableEntity("partitionKey", "rowKey");
-        entity.getProperties().put("firstName", "Jane");
-        entity.getProperties().put("lastName", "Doe");
-
-        UserProfile userProfile = userProfileService.mapToUserProfile(entity);
-
-        assertEquals("partitionKey", userProfile.getPartitionKey());
-        assertEquals("rowKey", userProfile.getRowId());
-        assertEquals("Jane", userProfile.getFirstName());
-        assertEquals("Doe", userProfile.getLastName());
-    }
-
-    @Test
-    void testMapToTableEntity() {
-        UserProfile userProfile = new UserProfile();
-        userProfile.setPartitionKey("partitionKey");
-        userProfile.setRowId("rowKey");
-        userProfile.setFirstName("Jane");
-        userProfile.setLastName("Doe");
-
-        TableEntity entity = userProfileService.mapToTableEntity(userProfile);
-
-        assertEquals("partitionKey", entity.getPartitionKey());
-        assertEquals("rowKey", entity.getRowKey());
-        assertEquals("Jane", entity.getProperties().get("firstName"));
-        assertEquals("Doe", entity.getProperties().get("lastName"));
+        assertDoesNotThrow(() -> userProfileService.updateProfile(updatedProfile));
+        verify(userProfileService, times(1)).updateProfile(updatedProfile);
     }
 }
