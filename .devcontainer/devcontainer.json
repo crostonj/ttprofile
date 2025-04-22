@@ -11,7 +11,8 @@
 			"installMaven": "true",
 			"installGradle": "false"
 		},
-		"ghcr.io/rjfmachado/devcontainer-features/cloud-native:1": {}
+		"ghcr.io/devcontainers/features/azure-cli:1": {},
+		"ghcr.io/devcontainers/features/kubectl-helm-minikube:1": {}
 	}
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.

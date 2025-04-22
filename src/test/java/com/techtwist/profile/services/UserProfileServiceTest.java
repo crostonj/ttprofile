@@ -2,9 +2,13 @@ package com.techtwist.profile.services;
 
 import com.azure.data.tables.models.TableEntity;
 import com.techtwist.profile.models.UserProfile;
+import com.techtwist.profile.services.interfaces.IUserProfileService;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 import java.util.*;
 
@@ -12,13 +16,18 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 class UserProfileServiceTest {
-    private UserProfileService userProfileService;
+    // Mocking the UserProfileService class
+
+    @Qualifier("inMemoryUserProfileService") // Explicitly name the mock to match the qualifier
+    private IUserProfileService userProfileService;
+
+    private String rowKey;
+    private String partitionKey = "TestCompany";
 
     @BeforeEach
     void setUp() {
-        userProfileService = Mockito.spy(new UserProfileService());
-        doNothing().when(userProfileService).initialize(); // Mock initialize method
-    }
+        MockitoAnnotations.openMocks(this);
+        rowKey = UUID.randomUUID().toString()    }
 
    // @Test
     void testGetProfile() {

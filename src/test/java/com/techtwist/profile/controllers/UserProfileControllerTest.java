@@ -1,13 +1,14 @@
 package com.techtwist.profile.controllers;
 
 import com.techtwist.profile.models.UserProfile;
-import com.techtwist.profile.services.UserProfileService;
+import com.techtwist.profile.services.interfaces.IUserProfileService;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 
 import java.util.Collections;
@@ -21,7 +22,8 @@ import static org.mockito.Mockito.*;
 class UserProfileControllerTest {
 
     @Mock
-    private UserProfileService userProfileService;
+    @Qualifier("inMemoryUserProfileService") // Explicitly name the mock to match the qualifier
+    private IUserProfileService userProfileService;
 
     @InjectMocks
     private UserProfileController userProfileController;
@@ -49,7 +51,7 @@ class UserProfileControllerTest {
     void testCreateProfile() {
         UserProfile mockProfile = new UserProfile();
         mockProfile.setPartitionKey(partitionKey);
-        mockProfile.setRowId(rowKey);
+        mockProfile.setRowKey(rowKey);
 
         doNothing().when(userProfileService).createProfile(any());
 
@@ -62,7 +64,7 @@ class UserProfileControllerTest {
     void testUpdateProfile() {
         UserProfile mockProfile = new UserProfile();
         mockProfile.setPartitionKey(partitionKey);
-        mockProfile.setRowId(rowKey);
+        mockProfile.setRowKey(rowKey);
 
         doNothing().when(userProfileService).updateProfile(any());
 

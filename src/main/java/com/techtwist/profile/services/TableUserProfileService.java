@@ -4,6 +4,7 @@ import com.azure.data.tables.TableClient;
 import com.azure.data.tables.TableClientBuilder;
 import com.azure.data.tables.models.TableEntity;
 import com.techtwist.profile.models.UserProfile;
+import com.techtwist.profile.services.interfaces.IUserProfileService;
 
 import jakarta.annotation.PostConstruct;
 
@@ -13,17 +14,20 @@ import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
-@Service
-public class UserProfileService {
+@Service("TableUserProfileService")
+public class TableUserProfileService implements IUserProfileService {
     private TableClient tableClient;
 
     private final String accountName = System.getenv("ACCOUNTNAME");
     private final String accountKey = System.getenv("ACCOUNTKEY");
     private final String tableName = System.getenv("TABLENAME");
 
+    private static final int PARTITION_KEY = 0;
+    private static final int  ROW_KEY = 1;
+
+    @Override
     @PostConstruct
     public void initialize() {
-  
         if (tableClient == null) {
             tableClient = new TableClientBuilder()
                     .connectionString(String.format("DefaultEndpointsProtocol=https;AccountName=%s;AccountKey=%s;TableEndpoint=https://%s.table.core.windows.net;", accountName, accountKey, accountName))
@@ -32,49 +36,92 @@ public class UserProfileService {
         }
     }
 
+    private String[] splitKey(String key) {
+        if (key == null || !key.contains(":")) {
+            throw new IllegalArgumentException("Invalid key format. Expected format: 'partitionKey:rowKey'");
+        }
+        return key.split(":", 2); // Split into two parts: partitionKey and rowKey
+    }
+
     // Fetch profile information by partition key and row key
-    public TableEntity getProfile(String partitionKey, String rowKey) {
+    @Override
+    public UserProfile getProfile(String key) {
         if (tableClient == null) {
             throw new IllegalStateException("TableClient is not initialized. Call initialize() first.");
         }
-        TableEntity entity = tableClient.getEntity(partitionKey, rowKey);
+        String[] keys = splitKey(key);
+        TableEntity entity = tableClient.getEntity(keys[PARTITION_KEY], keys[ROW_KEY]); // Use keys[0] as PARTITION_KEY and keys[1] as ROW_KEY
         if (entity.getProperties() == null || entity.getProperties().isEmpty()) {
             throw new RuntimeException("Retrieved entity has no properties.");
         }
-        return entity;
+        return mapToUserProfile(entity);
     }
 
     // Fetch all profiles from the table
-    public List<TableEntity> listAllProfiles() {
+    public List<UserProfile> listAllProfiles() {
         if (tableClient == null) {
             throw new IllegalStateException("TableClient is not initialized. Call initialize() first.");
         }
-        List<TableEntity> profiles = new ArrayList<>();
-        tableClient.listEntities().forEach(profiles::add);
+        List<UserProfile> profiles = new ArrayList<>();
+        tableClient.listEntities().forEach(entity -> {
+            UserProfile profile = mapToUserProfile(entity);
+            profiles.add(profile);
+        });
         return profiles;
     }
 
     // Create a new profile
-    public void createProfile(TableEntity profile) {
+    public void createProfile(UserProfile profile) {
         if (tableClient == null) {
             throw new IllegalStateException("TableClient is not initialized. Call initialize() first.");
         }
         try {
-            tableClient.createEntity(profile);
+            TableEntity entity = mapToTableEntity(profile);
+            tableClient.createEntity(entity);
         } catch (Exception e) {
             throw new RuntimeException("Failed to create profile: " + e.getMessage(), e);
         }
     }
 
     // Update an existing profile
-    public void updateProfile(TableEntity profile) {
+    public void updateProfile(UserProfile profile) {
         if (tableClient == null) {
             throw new IllegalStateException("TableClient is not initialized. Call initialize() first.");
         }
         try {
-            tableClient.updateEntity(profile);
+            TableEntity entity = mapToTableEntity(profile);
+            tableClient.updateEntity(entity);
         } catch (Exception e) {
             throw new RuntimeException("Failed to update profile: " + e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public boolean deleteProfile(String key) {
+        if (tableClient == null) {
+            throw new IllegalStateException("TableClient is not initialized. Call initialize() first.");
+        }
+        try {
+            String[] keys = splitKey(key);
+            tableClient.deleteEntity(keys[PARTITION_KEY], keys[ROW_KEY]); // Use keys[0] as PARTITION_KEY and keys[1] as ROW_KEY
+            return true;
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to delete profile: " + e.getMessage(), e);
+        }
+    }
+
+
+    public boolean profileExists(String key) {
+        if (tableClient == null) {
+            throw new IllegalStateException("TableClient is not initialized. Call initialize() first.");
+        }
+        try {
+            String[] keys = splitKey(key);
+
+        tableClient.getEntity(keys[PARTITION_KEY], keys[ROW_KEY]); // Use keys[0] as PARTITION_KEY and keys[1] as ROW_KEY
+            return true;
+        } catch (Exception e) {
+            return false; // Return false if the entity does not exist
         }
     }
 
@@ -83,7 +130,7 @@ public class UserProfileService {
         Map<String, Object> properties = entity.getProperties();
 
         userProfile.setPartitionKey(entity.getPartitionKey());
-        userProfile.setRowId(entity.getRowKey());
+        userProfile.setRowKey(entity.getRowKey());
         userProfile.setFirstName(properties.getOrDefault("firstName", "").toString());
         userProfile.setLastName(properties.getOrDefault("lastName", "").toString());
         userProfile.setEmail(properties.getOrDefault("email", "").toString());
@@ -98,7 +145,7 @@ public class UserProfileService {
     }
 
     public TableEntity mapToTableEntity(UserProfile profile) {
-        TableEntity entity = new TableEntity(profile.getPartitionKey(), profile.getRowId());
+        TableEntity entity = new TableEntity(profile.getPartitionKey(), profile.getRowKey());
         entity.getProperties().put("firstName", profile.getFirstName());
         entity.getProperties().put("lastName", profile.getLastName());
         entity.getProperties().put("email", profile.getEmail());

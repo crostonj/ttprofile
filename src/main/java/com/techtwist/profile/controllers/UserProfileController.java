@@ -1,20 +1,20 @@
 package com.techtwist.profile.controllers;
 
-import com.azure.data.tables.models.TableEntity;
 import com.techtwist.profile.models.UserProfile;
-import com.techtwist.profile.services.UserProfileService;
+import com.techtwist.profile.services.interfaces.IUserProfileService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.stream.Collectors;
+
 
 @Tag(name = "User Profiles", description = "API for managing user profiles")
 @RestController
@@ -23,14 +23,16 @@ import java.util.stream.Collectors;
 public class UserProfileController {
 
     @Autowired
-    private UserProfileService userProfileService;
+    @Qualifier("${user.profile.service.qualifier}") // Specify the desired implementation
+    private IUserProfileService userProfileService;
 
     @Operation(summary = "Get a user profile", description = "Retrieve a user profile by partition key and row key")
     @GetMapping("/{partitionKey}/{rowKey}")
     public ResponseEntity<UserProfile> getProfile(@PathVariable String partitionKey, @PathVariable String rowKey) {
         try {
-            TableEntity entity = userProfileService.getProfile(partitionKey, rowKey);
-            return ResponseEntity.ok(userProfileService.mapToUserProfile(entity));
+            String key = generateKey(partitionKey, rowKey);
+            UserProfile entity = userProfileService.getProfile(key);
+            return ResponseEntity.ok(entity);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
@@ -41,10 +43,9 @@ public class UserProfileController {
     public ResponseEntity<List<UserProfile>> listAllProfiles() {
         try {
             // Ensure the service returns TableEntity objects
-            List<TableEntity> tableEntities = userProfileService.listAllProfiles();
-            // Convert TableEntity objects to UserProfile objects
-            List<UserProfile> userProfiles = mapToUserProfiles(tableEntities);
-            return ResponseEntity.ok(userProfiles);
+            List<UserProfile> profiles = userProfileService.listAllProfiles();
+ 
+            return ResponseEntity.ok(profiles);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
@@ -55,8 +56,8 @@ public class UserProfileController {
     @PostMapping
     public ResponseEntity<String> createProfile(@RequestBody UserProfile profile) {
         try {
-            TableEntity entity = userProfileService.mapToTableEntity(profile);
-            userProfileService.createProfile(entity);
+           
+            userProfileService.createProfile(profile);
             return ResponseEntity.status(HttpStatus.CREATED).body("Profile created successfully.");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to create profile: " + e.getMessage());
@@ -68,18 +69,23 @@ public class UserProfileController {
     @PutMapping
     public ResponseEntity<String> updateProfile(@RequestBody UserProfile profile) {
         try {
-            TableEntity entity = userProfileService.mapToTableEntity(profile);
-            userProfileService.updateProfile(entity);
+ 
+            userProfileService.updateProfile(profile);
             return ResponseEntity.ok("Profile updated successfully.");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to update profile: " + e.getMessage());
         }
     }
 
-    // Utility method to map a list of TableEntity to a list of UserProfile
-    private List<UserProfile> mapToUserProfiles(List<TableEntity> entities) {
-        return entities.stream()
-                       .map(userProfileService::mapToUserProfile)
-                       .collect(Collectors.toList());
+    // Add this method to the UserProfileController class
+    /**
+     * Utility method to generate a key by combining partition key and row key.
+     *
+     * @param partitionKey The partition key.
+     * @param rowKey The row key.
+     * @return A combined key in the format "partitionKey:rowKey".
+     */
+    private String generateKey(String partitionKey, String rowKey) {
+        return partitionKey + ":" + rowKey;
     }
 }
