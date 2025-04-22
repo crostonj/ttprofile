@@ -32,7 +32,7 @@ jobs:
     - name: Build and push image for Raspberry Pi (ARM)
       uses: docker/build-push-action@v5
       with:
-        context: ./Profile
+        context: .
         push: true
         tags: crostonj/techtwist-profile:raspberry-pi
         platforms: linux/arm64
@@ -40,7 +40,7 @@ jobs:
     - name: Build and push image for Intel-based computers (AMD)
       uses: docker/build-push-action@v5
       with:
-        context: ./Profile
+        context: .
         push: true
         tags: crostonj/techtwist-profile:intel
         platforms: linux/amd64
