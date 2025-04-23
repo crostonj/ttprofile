@@ -14,13 +14,13 @@ import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
-@Service("TableUserProfileService")
-public class TableUserProfileService implements IUserProfileService {
+//@Service("TableUserProfileService")
+public class TableUserProfileServiceImpl implements IUserProfileService {
     private TableClient tableClient;
 
-    private final String accountName = System.getenv("ACCOUNTNAME");
-    private final String accountKey = System.getenv("ACCOUNTKEY");
-    private final String tableName = System.getenv("TABLENAME");
+    private final String accountName = "";//System.getenv("ACCOUNTNAME");
+    private final String accountKey = "";//System.getenv("ACCOUNTKEY");
+    private final String tableName = "";//System.getenv("TABLENAME");
 
     private static final int PARTITION_KEY = 0;
     private static final int  ROW_KEY = 1;

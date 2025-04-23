@@ -9,8 +9,8 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-@Service("inMemoryUserProfileService")
-public class InMemoryUserProfileService implements IUserProfileService {
+@Service("InMemoryUserProfileService")
+public class InMemoryUserProfileServiceImpl implements IUserProfileService {
 
 
     private static final int PARTITION_KEY = 0;
