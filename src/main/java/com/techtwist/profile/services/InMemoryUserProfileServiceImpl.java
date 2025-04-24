@@ -18,7 +18,7 @@ public class InMemoryUserProfileServiceImpl implements IUserProfileService {
 
     private final Map<String, UserProfile> inMemoryStore = new ConcurrentHashMap<>();
 
-    public InMemoryProductService() {
+    public InMemoryUserProfileServiceImpl() {
         initialize();
     }
 
