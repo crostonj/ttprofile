@@ -18,6 +18,10 @@ public class InMemoryUserProfileServiceImpl implements IUserProfileService {
 
     private final Map<String, UserProfile> inMemoryStore = new ConcurrentHashMap<>();
 
+    public InMemoryProductService() {
+        initialize();
+    }
+
     @Override
     public UserProfile getProfile(String key) {
         if (key == null || !key.contains(":")) {
