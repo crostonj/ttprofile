@@ -19,13 +19,28 @@ import java.util.List;
 @Tag(name = "User Profiles", description = "API for managing user profiles")
 @RestController
 @CrossOrigin(origins = "*") // Allow all origins or specify multiple origins as needed
-@RequestMapping("/userprofiles")
+@RequestMapping("/profile")
 public class UserProfileController {
 
     @Autowired
     @Qualifier("${user.profile.service.qualifier}") // Specify the desired implementation
     private IUserProfileService userProfileService;
 
+    @Operation(summary = "Get a user profile by name", description = "Retrieve a user profile by first name and last name")
+    @GetMapping("/name")
+    public ResponseEntity<UserProfile> getProfileByName(
+            @RequestParam String username) {
+        try {
+            UserProfile profile = userProfileService.getProfileByName(username);
+            if (profile != null) {
+                return ResponseEntity.ok(profile);
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
     @Operation(summary = "Get a user profile", description = "Retrieve a user profile by partition key and row key")
     @GetMapping("/{partitionKey}/{rowKey}")
     public ResponseEntity<UserProfile> getProfile(@PathVariable String partitionKey, @PathVariable String rowKey) {

@@ -65,7 +65,13 @@ public class InMemoryUserProfileServiceImpl implements IUserProfileService {
         return users;
     }
 
-
+    @Override
+    public UserProfile getProfileByName(String username) {
+        return inMemoryStore.values().stream()
+                .filter(profile -> profile.getUsername().equalsIgnoreCase(username))            
+                .findFirst()
+                .orElse(null);
+    }
 
     @Override
     public void initialize() {
@@ -73,17 +79,21 @@ public class InMemoryUserProfileServiceImpl implements IUserProfileService {
             String partitionKey = "userPartition";
             String rowKey = "user" + i;
             UserProfile entity = new UserProfile();
-            entity.getProperties().put("name", "User " + i);
-            entity.getProperties().put("email", "user" + i + "@example.com");
-            entity.getProperties().put("age", 20 + i);
-            entity.getProperties().put("address", "Address " + i);
-            entity.getProperties().put("city", "City " + i);
-            entity.getProperties().put("state", "State " + i);
-            entity.getProperties().put("zipCode", "Zip " + i);
-            entity.getProperties().put("country", "Country " + i);
-            entity.setRowKey(rowKey);
             entity.setPartitionKey(partitionKey);
-            inMemoryStore.put( UserProfile.generateKey(partitionKey, rowKey), entity);
+            entity.setRowKey(rowKey);
+            entity.setFirstName("John" + i);
+            entity.setLastName("Doe" + i);
+            entity.setEmail("john.doe" + i + "@example.com");
+            entity.setAddressLine1("123 Main St " + i);
+            entity.setAddressLine2("Apt 4B " + i);
+            entity.setCity("Springfield " + i);
+            entity.setState("IL");
+            entity.setZipCode("62704");
+            entity.setCountry("USA");
+            entity.setId(i);
+            entity.setUsername("User" + i);
+
+            createProfile(entity);
         }
     }
 
@@ -97,5 +107,9 @@ public class InMemoryUserProfileServiceImpl implements IUserProfileService {
         }
         inMemoryStore.remove(key);
         return true;
+    }
+
+    public Map<String, UserProfile> getUserProfileStore() {
+        return inMemoryStore; // Expose internal store for testing
     }
 }

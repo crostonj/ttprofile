@@ -1,14 +1,20 @@
 package com.techtwist.profile.controllers;
 
+import com.techtwist.profile.helper.UserProfileServiceHelper;
 import com.techtwist.profile.models.UserProfile;
 import com.techtwist.profile.services.interfaces.IUserProfileService;
+
+import io.swagger.v3.oas.models.security.SecurityScheme.In;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.ResponseEntity;
 
 import java.util.Collections;
@@ -19,6 +25,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+@WebMvcTest(controllers = UserProfileController.class)
+@Import(UserProfileServiceHelper.class)
 class UserProfileControllerTest {
 
     @Mock
@@ -30,6 +38,9 @@ class UserProfileControllerTest {
     
     private String rowKey;
     private String partitionKey = "TestCompany";
+
+    @Autowired
+    private UserProfileServiceHelper userProfileServiceHelper;
 
     @BeforeEach
     void setUp() {

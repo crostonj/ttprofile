@@ -12,9 +12,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
-//@Service("TableUserProfileService")
+@Service("TableUserProfileService")
+@ConditionalOnProperty(name = "service.InMemoryProductService.enabled", havingValue = "true", matchIfMissing = true)
 public class TableUserProfileServiceImpl implements IUserProfileService {
     private TableClient tableClient;
 
@@ -159,5 +161,11 @@ public class TableUserProfileServiceImpl implements IUserProfileService {
             entity.getProperties().putAll(profile.getProperties());
         }
         return entity;
+    }
+
+    @Override
+    public UserProfile getProfileByName(String username) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getProfileByName'");
     }
 }

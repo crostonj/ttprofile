@@ -11,6 +11,8 @@ import java.util.Map;
 @AllArgsConstructor
 public class UserProfile {
 
+    private Integer id; // Unique identifier for the user profile
+    private String username; // Unique username for the user
     private String firstName;
     private String lastName;
     private String email;

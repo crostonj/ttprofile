@@ -16,5 +16,6 @@ public interface IUserProfileService {
     void createProfile(UserProfile profile);
     void updateProfile(UserProfile profile);
     boolean deleteProfile(String key);
+    UserProfile getProfileByName(String username);
     
 }

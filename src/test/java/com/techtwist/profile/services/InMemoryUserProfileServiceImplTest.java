@@ -14,7 +14,7 @@ import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-class UserProfileServiceTest {
+class InMemoryUserProfileServiceImplTest {
     @Qualifier("InMemoryUserProfileService") // Explicitly name the mock to match the qualifier
     private IUserProfileService userProfileService;
 
