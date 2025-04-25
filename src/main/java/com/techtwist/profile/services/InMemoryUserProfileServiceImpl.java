@@ -5,11 +5,13 @@ import com.techtwist.profile.models.UserProfile;
 import com.techtwist.profile.services.interfaces.IUserProfileService;
 
 import org.springframework.stereotype.Service;
+import org.springframework.context.annotation.Primary;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Service("InMemoryUserProfileService")
+@Primary 
 public class InMemoryUserProfileServiceImpl implements IUserProfileService {
 
 

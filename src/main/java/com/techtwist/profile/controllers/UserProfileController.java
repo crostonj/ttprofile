@@ -23,7 +23,7 @@ import java.util.List;
 public class UserProfileController {
 
     @Autowired
-    @Qualifier("${user.profile.service.qualifier}") // Specify the desired implementation
+    @Qualifier("InMemoryUserProfileService") // Specify the desired implementation
     private IUserProfileService userProfileService;
 
     @Operation(summary = "Get a user profile by name", description = "Retrieve a user profile by first name and last name")

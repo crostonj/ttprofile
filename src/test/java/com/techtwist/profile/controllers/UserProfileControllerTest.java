@@ -77,6 +77,8 @@ class UserProfileControllerTest {
         mockProfile.setPartitionKey(partitionKey);
         mockProfile.setRowKey(rowKey);
 
+        userProfileServiceHelper.addProfile(mockProfile);
+
         doNothing().when(userProfileService).updateProfile(any());
 
         ResponseEntity<String> response = userProfileController.updateProfile(mockProfile);

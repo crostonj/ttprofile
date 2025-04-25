@@ -12,17 +12,21 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-@Service("TableUserProfileService")
-@ConditionalOnProperty(name = "service.InMemoryProductService.enabled", havingValue = "true", matchIfMissing = true)
+@Service
 public class TableUserProfileServiceImpl implements IUserProfileService {
     private TableClient tableClient;
 
-    private final String accountName = "";//System.getenv("ACCOUNTNAME");
-    private final String accountKey = "";//System.getenv("ACCOUNTKEY");
-    private final String tableName = "";//System.getenv("TABLENAME");
+    @Value("${azure.storage.account-name:}")
+    private String accountName;
+    
+    @Value("${azure.storage.account-key:}")
+    private String accountKey;
+    
+    @Value("${azure.storage.table-name:}")
+    private String tableName;
 
     private static final int PARTITION_KEY = 0;
     private static final int  ROW_KEY = 1;
@@ -30,9 +34,15 @@ public class TableUserProfileServiceImpl implements IUserProfileService {
     @Override
     @PostConstruct
     public void initialize() {
+        if (accountName.isEmpty() || accountKey.isEmpty() || tableName.isEmpty()) {
+            // Skip initialization if any credential is missing
+            return;
+        }
+        
         if (tableClient == null) {
             tableClient = new TableClientBuilder()
-                    .connectionString(String.format("DefaultEndpointsProtocol=https;AccountName=%s;AccountKey=%s;TableEndpoint=https://%s.table.core.windows.net;", accountName, accountKey, accountName))
+                    .connectionString(String.format("DefaultEndpointsProtocol=https;AccountName=%s;AccountKey=%s;TableEndpoint=https://%s.table.core.windows.net;", 
+                        accountName, accountKey, accountName))
                     .tableName(tableName)
                     .buildClient();
         }
@@ -165,7 +175,15 @@ public class TableUserProfileServiceImpl implements IUserProfileService {
 
     @Override
     public UserProfile getProfileByName(String username) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getProfileByName'");
+        if (tableClient == null) {
+            throw new IllegalStateException("TableClient is not initialized");
+        }
+        
+        return tableClient.listEntities()
+            .stream()
+            .map(this::mapToUserProfile)
+            .filter(profile -> username.equals(profile.getFirstName()))
+            .findFirst()
+            .orElse(null);
     }
 }

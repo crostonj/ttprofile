@@ -11,7 +11,7 @@
 	<groupId>com.techtwist</groupId>
 	<artifactId>Profile</artifactId>
 	<version>1.0</version>
-	<name>profile</name>
+	<name>Profile</name>
 	<description>Demo project for Spring Boot</description>
 	<url/>
 	<licenses>
