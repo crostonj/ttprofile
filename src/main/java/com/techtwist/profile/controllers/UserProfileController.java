@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-
 @Tag(name = "User Profiles", description = "API for managing user profiles")
 @RestController
 @CrossOrigin(origins = "*") // Allow all origins or specify multiple origins as needed
@@ -26,10 +25,16 @@ public class UserProfileController {
     @Qualifier("InMemoryUserProfileService") // Specify the desired implementation
     private IUserProfileService userProfileService;
 
+    /**
+     * Retrieves a user profile by username.
+     * 
+     * @param username The username of the user profile to retrieve.
+     * @return The user profile if found, or a 404 status if not found.
+     */
     @Operation(summary = "Get a user profile by name", description = "Retrieve a user profile by first name and last name")
-    @GetMapping("/name")
+    @GetMapping("/name/{username}")
     public ResponseEntity<UserProfile> getProfileByName(
-            @RequestParam String username) {
+            @PathVariable String username) {
         try {
             UserProfile profile = userProfileService.getProfileByName(username);
             if (profile != null) {
@@ -41,6 +46,14 @@ public class UserProfileController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
+
+    /**
+     * Retrieves a user profile by partition key and row key.
+     * 
+     * @param partitionKey The partition key of the user profile.
+     * @param rowKey The row key of the user profile.
+     * @return The user profile if found, or a 500 status in case of an error.
+     */
     @Operation(summary = "Get a user profile", description = "Retrieve a user profile by partition key and row key")
     @GetMapping("/{partitionKey}/{rowKey}")
     public ResponseEntity<UserProfile> getProfile(@PathVariable String partitionKey, @PathVariable String rowKey) {
@@ -53,25 +66,33 @@ public class UserProfileController {
         }
     }
 
+    /**
+     * Lists all user profiles.
+     * 
+     * @return A list of all user profiles or a 500 status in case of an error.
+     */
     @Operation(summary = "List all user profiles", description = "Retrieve a list of all user profiles")
     @GetMapping("/list")
     public ResponseEntity<List<UserProfile>> listAllProfiles() {
         try {
-            // Ensure the service returns TableEntity objects
             List<UserProfile> profiles = userProfileService.listAllProfiles();
- 
             return ResponseEntity.ok(profiles);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
 
+    /**
+     * Creates a new user profile.
+     * 
+     * @param profile The details of the user profile to create.
+     * @return The created user profile or a 500 status in case of an error.
+     */
     @Operation(summary = "Create a new user profile", description = "Create a new user profile with the provided details")
-    @RequestBody(description = "User profile details", required = true) 
+    @RequestBody(description = "User profile details", required = true)
     @PostMapping
     public ResponseEntity<UserProfile> createProfile(@RequestBody UserProfile profile) {
         try {
-           
             UserProfile newProfile = userProfileService.createProfile(profile);
             return ResponseEntity.status(HttpStatus.CREATED).body(newProfile);
         } catch (Exception e) {
@@ -79,12 +100,17 @@ public class UserProfileController {
         }
     }
 
+    /**
+     * Updates an existing user profile.
+     * 
+     * @param profile The updated details of the user profile.
+     * @return The updated user profile or a 500 status in case of an error.
+     */
     @Operation(summary = "Update an existing user profile", description = "Update an existing user profile with the provided details")
     @RequestBody(description = "Updated user profile details", required = true)
     @PutMapping
     public ResponseEntity<UserProfile> updateProfile(@RequestBody UserProfile profile) {
         try {
- 
             UserProfile newProfile = userProfileService.updateProfile(profile);
             return ResponseEntity.ok(newProfile);
         } catch (Exception e) {
@@ -92,7 +118,6 @@ public class UserProfileController {
         }
     }
 
-    // Add this method to the UserProfileController class
     /**
      * Utility method to generate a key by combining partition key and row key.
      *
