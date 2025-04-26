@@ -13,8 +13,8 @@ public interface IUserProfileService {
 
     UserProfile getProfile(String Key);
     List<UserProfile> listAllProfiles();
-    void createProfile(UserProfile profile);
-    void updateProfile(UserProfile profile);
+    UserProfile createProfile(UserProfile profile);
+    UserProfile updateProfile(UserProfile profile);
     boolean deleteProfile(String key);
     UserProfile getProfileByName(String username);
     

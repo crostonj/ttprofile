@@ -7,6 +7,7 @@ import com.techtwist.profile.services.interfaces.IUserProfileService;
 import org.springframework.stereotype.Service;
 import org.springframework.context.annotation.Primary;
 
+
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -21,50 +22,82 @@ public class InMemoryUserProfileServiceImpl implements IUserProfileService {
     private final Map<String, UserProfile> inMemoryStore = new ConcurrentHashMap<>();
 
     public InMemoryUserProfileServiceImpl() {
+
+        // Skip initialization if the active profile is "test"
+        String activeProfile = System.getProperty("spring.profiles.active", "");
+        if ("test".equalsIgnoreCase(activeProfile)) {
+            return;
+        }
+
         initialize();
     }
 
     @Override
     public UserProfile getProfile(String key) {
-        if (key == null || !key.contains(":")) {
-            throw new IllegalArgumentException("Invalid key format. Expected format: 'partitionKey:rowKey'");
-        }
-        String[] keys = key.split(":", 2);
-        String partitionKey = keys[PARTITION_KEY];
-        String rowKey = keys[ROW_KEY];
-        if (partitionKey == null || rowKey == null) {
-            throw new IllegalArgumentException("Invalid key format. Expected format: 'partitionKey:rowKey'");
-        }
-        if (!inMemoryStore.containsKey(key)) {
-            throw new IllegalArgumentException("Profile does not exist with the given partitionKey and rowKey.");
-        }
+        try {
+            if (key == null || !key.contains(":")) {
+                throw new IllegalArgumentException("Invalid key format. Expected format: 'partitionKey:rowKey'");
+            }
+            String[] keys = key.split(":", 2);
+            String partitionKey = keys[PARTITION_KEY];
+            String rowKey = keys[ROW_KEY];
+            if (partitionKey == null || rowKey == null) {
+                throw new IllegalArgumentException("Invalid key format. Expected format: 'partitionKey:rowKey'");
+            }
+            if (!inMemoryStore.containsKey(key)) {
+                throw new IllegalArgumentException("Profile does not exist with the given partitionKey and rowKey.");
+            }
 
-        return inMemoryStore.get(key);
+            return inMemoryStore.get(key);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null; // Return null or handle the exception as needed
+        }
     }
 
     @Override
     public List<UserProfile> listAllProfiles() {
-        return new ArrayList<>(inMemoryStore.values());
+        try {
+            inMemoryStore.entrySet().stream()
+                .sorted(Map.Entry.comparingByKey())
+                .forEachOrdered(entry -> inMemoryStore.put(entry.getKey(), entry.getValue()));
+
+            return new ArrayList<>(inMemoryStore.values());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Collections.emptyList(); // Return an empty list in case of an error
+        }
     }
 
     @Override
-    public void createProfile(UserProfile entity) {
-        String key =  UserProfile.generateKey(entity.getPartitionKey(), entity.getRowKey());
-        if (inMemoryStore.containsKey(key)) {
-            throw new IllegalArgumentException("Profile already exists with the given partitionKey and rowKey.");
+    public UserProfile createProfile(UserProfile entity) {
+        try {
+            String key = UserProfile.generateKey(entity.getPartitionKey(), entity.getRowKey());
+            if (inMemoryStore.containsKey(key)) {
+                return inMemoryStore.get(key); // Return existing profile if it already exists
+            }
+            UserProfile profile = inMemoryStore.put(key, entity);
+            return profile;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null; // Return null or handle the exception as needed
         }
-        inMemoryStore.put(key, entity);
     }
 
     @Override
-    public void updateProfile(UserProfile entity) {
-        String key = UserProfile.generateKey(entity.getPartitionKey(), entity.getRowKey());
-        if (!inMemoryStore.containsKey(key)) {
-            throw new IllegalArgumentException("Profile does not exist with the given partitionKey and rowKey.");
+    public UserProfile updateProfile(UserProfile entity) {
+        try {
+            String key = UserProfile.generateKey(entity.getPartitionKey(), entity.getRowKey());
+            if (!inMemoryStore.containsKey(key)) {
+                throw new IllegalArgumentException("Profile does not exist with the given partitionKey and rowKey.");
+            }
+            UserProfile profile = inMemoryStore.put(key, entity);
+            return profile;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null; // Return null or handle the exception as needed
         }
-        inMemoryStore.put(key, entity);
     }
-
 
     public List<UserProfile> getAllUsers() {
         List<UserProfile> users = new ArrayList<>();
@@ -83,7 +116,7 @@ public class InMemoryUserProfileServiceImpl implements IUserProfileService {
     public void initialize() {
         for (int i = 1; i <= 10; i++) {
             String partitionKey = "userPartition";
-            String rowKey = "user" + i;
+            String rowKey = "User" + i;
             UserProfile entity = new UserProfile();
             entity.setPartitionKey(partitionKey);
             entity.setRowKey(rowKey);
@@ -101,18 +134,26 @@ public class InMemoryUserProfileServiceImpl implements IUserProfileService {
 
             createProfile(entity);
         }
+
+        //order the map by partitionKey and rowKey
+     
     }
 
     @Override
     public boolean deleteProfile(String key) {
-        if (key == null || !key.contains(":")) {
-            throw new IllegalArgumentException("Invalid key format. Expected format: 'partitionKey:rowKey'");
+        try {
+            if (key == null || !key.contains(":")) {
+                throw new IllegalArgumentException("Invalid key format. Expected format: 'partitionKey:rowKey'");
+            }
+            if (!inMemoryStore.containsKey(key)) {
+                throw new IllegalArgumentException("Profile does not exist with the given key.");
+            }
+            inMemoryStore.remove(key);
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false; // Return false or handle the exception as needed
         }
-        if (!inMemoryStore.containsKey(key)) {
-            throw new IllegalArgumentException("Profile does not exist with the given key.");
-        }
-        inMemoryStore.remove(key);
-        return true;
     }
 
     public Map<String, UserProfile> getUserProfileStore() {

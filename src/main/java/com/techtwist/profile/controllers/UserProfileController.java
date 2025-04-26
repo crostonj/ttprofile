@@ -69,26 +69,26 @@ public class UserProfileController {
     @Operation(summary = "Create a new user profile", description = "Create a new user profile with the provided details")
     @RequestBody(description = "User profile details", required = true) 
     @PostMapping
-    public ResponseEntity<String> createProfile(@RequestBody UserProfile profile) {
+    public ResponseEntity<UserProfile> createProfile(@RequestBody UserProfile profile) {
         try {
            
-            userProfileService.createProfile(profile);
-            return ResponseEntity.status(HttpStatus.CREATED).body("Profile created successfully.");
+            UserProfile newProfile = userProfileService.createProfile(profile);
+            return ResponseEntity.status(HttpStatus.CREATED).body(newProfile);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to create profile: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
 
     @Operation(summary = "Update an existing user profile", description = "Update an existing user profile with the provided details")
     @RequestBody(description = "Updated user profile details", required = true)
     @PutMapping
-    public ResponseEntity<String> updateProfile(@RequestBody UserProfile profile) {
+    public ResponseEntity<UserProfile> updateProfile(@RequestBody UserProfile profile) {
         try {
  
-            userProfileService.updateProfile(profile);
-            return ResponseEntity.ok("Profile updated successfully.");
+            UserProfile newProfile = userProfileService.updateProfile(profile);
+            return ResponseEntity.ok(newProfile);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to update profile: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
 

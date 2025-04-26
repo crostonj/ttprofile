@@ -83,26 +83,28 @@ public class TableUserProfileServiceImpl implements IUserProfileService {
     }
 
     // Create a new profile
-    public void createProfile(UserProfile profile) {
+    public UserProfile createProfile(UserProfile profile) {
         if (tableClient == null) {
             throw new IllegalStateException("TableClient is not initialized. Call initialize() first.");
         }
         try {
             TableEntity entity = mapToTableEntity(profile);
             tableClient.createEntity(entity);
+            return mapToUserProfile(entity);
         } catch (Exception e) {
             throw new RuntimeException("Failed to create profile: " + e.getMessage(), e);
         }
     }
 
     // Update an existing profile
-    public void updateProfile(UserProfile profile) {
+    public UserProfile updateProfile(UserProfile profile) {
         if (tableClient == null) {
             throw new IllegalStateException("TableClient is not initialized. Call initialize() first.");
         }
         try {
             TableEntity entity = mapToTableEntity(profile);
             tableClient.updateEntity(entity);
+            return mapToUserProfile(entity);
         } catch (Exception e) {
             throw new RuntimeException("Failed to update profile: " + e.getMessage(), e);
         }
