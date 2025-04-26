@@ -8,7 +8,7 @@ import com.techtwist.profile.models.UserProfile;
 import com.techtwist.profile.services.InMemoryUserProfileServiceImpl;
 
 public class UserProfileServiceHelper {
-        @Autowired
+    @Autowired
     private InMemoryUserProfileServiceImpl inMemoryUserProfileService;
 
     public void addProfile(UserProfile userProfile) {

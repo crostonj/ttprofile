@@ -1,31 +1,41 @@
 package com.techtwist.profile.services;
 
+import com.techtwist.profile.helper.UserProfileServiceHelper;
 import com.techtwist.profile.models.UserProfile;
-import com.techtwist.profile.services.interfaces.IUserProfileService;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.context.annotation.Import;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+@SpringBootTest
+@ActiveProfiles("test") // Activate the "test" profile
+@Import(UserProfileServiceHelper.class)
 class InMemoryUserProfileServiceImplTest {
-    @Qualifier("InMemoryUserProfileService") // Explicitly name the mock to match the qualifier
-    private IUserProfileService userProfileService;
+   
+    @Mock
+    private InMemoryUserProfileServiceImpl inMemoryUserProfileService;
 
     private String rowKey;
     private String partitionKey = "TestCompany";
+
+    @Autowired
+    UserProfileServiceHelper userProfileServiceHelper;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
         rowKey = UUID.randomUUID().toString();
-        userProfileService = Mockito.mock(IUserProfileService.class);
+        //inMemoryUserProfileService = new InMemoryUserProfileServiceImpl(); // Use the actual implementation
     }
 
     @Test
@@ -46,9 +56,9 @@ class InMemoryUserProfileServiceImplTest {
         userProfile.setPartitionKey(partitionKey);
         userProfile.setRowKey(rowKey);
 
-        when(userProfileService.getProfile(key)).thenReturn(userProfile);
+        when(inMemoryUserProfileService.getProfile(key)).thenReturn(userProfile);
 
-        UserProfile result = userProfileService.getProfile(key);
+        UserProfile result = inMemoryUserProfileService.getProfile(key);
         assertNotNull(result);
         assertEquals("John", result.getFirstName());
         assertEquals("Doe", result.getLastName());
@@ -66,9 +76,9 @@ class InMemoryUserProfileServiceImplTest {
 
         List<UserProfile> mockProfiles = Arrays.asList(profile1, profile2);
 
-        when(userProfileService.listAllProfiles()).thenReturn(mockProfiles);
+        when(inMemoryUserProfileService.listAllProfiles()).thenReturn(mockProfiles);
 
-        List<UserProfile> result = userProfileService.listAllProfiles();
+        List<UserProfile> result = inMemoryUserProfileService.listAllProfiles();
         assertEquals(2, result.size());
         assertEquals("partition1", result.get(0).getPartitionKey());
         assertEquals("row1", result.get(0).getRowKey());
@@ -80,10 +90,17 @@ class InMemoryUserProfileServiceImplTest {
         newProfile.setPartitionKey("partitionKey");
         newProfile.setRowKey("rowKey");
 
-        doNothing().when(userProfileService).createProfile(newProfile);
+        // Mock the service to return the created profile
+        when(inMemoryUserProfileService.createProfile(any(UserProfile.class))).thenReturn(newProfile);
 
-        assertDoesNotThrow(() -> userProfileService.createProfile(newProfile));
-        verify(userProfileService, times(1)).createProfile(newProfile);
+        // Call the method and validate the result
+        UserProfile result = inMemoryUserProfileService.createProfile(newProfile);
+        assertNotNull(result);
+        assertEquals("partitionKey", result.getPartitionKey());
+        assertEquals("rowKey", result.getRowKey());
+
+        // Verify that the service method was called once
+        verify(inMemoryUserProfileService, times(1)).createProfile(newProfile);
     }
 
     @Test
@@ -91,10 +108,15 @@ class InMemoryUserProfileServiceImplTest {
         UserProfile updatedProfile = new UserProfile();
         updatedProfile.setPartitionKey("partitionKey");
         updatedProfile.setRowKey("rowKey");
+        updatedProfile.setFirstName("UpdatedFirstName");
+        updatedProfile.setLastName("UpdatedLastName");
 
-        doNothing().when(userProfileService).updateProfile(updatedProfile);
+        userProfileServiceHelper.addProfile(updatedProfile);
 
-        assertDoesNotThrow(() -> userProfileService.updateProfile(updatedProfile));
-        verify(userProfileService, times(1)).updateProfile(updatedProfile);
+        // Mock the behavior of the updateProfile method
+        when(inMemoryUserProfileService.updateProfile(any(UserProfile.class))).thenReturn(updatedProfile);
+
+        assertDoesNotThrow(() -> inMemoryUserProfileService.updateProfile(updatedProfile));
+        verify(inMemoryUserProfileService, times(1)).updateProfile(updatedProfile);
     }
 }
