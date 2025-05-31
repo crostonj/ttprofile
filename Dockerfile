@@ -20,7 +20,7 @@ COPY --from=build /app/target/Profile-1.0.jar app.jar
 COPY src/main/resources/Application.yaml /app/Application.yaml
 
 # Expose the port your app runs on
-EXPOSE 8080
+EXPOSE 8082
 
 ENV SPRING_CONFIG_LOCATION=file:/app/Application.yaml
 
