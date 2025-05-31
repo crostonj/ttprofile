@@ -40,7 +40,7 @@ spec:
           livenessProbe:
              httpGet:
                path: /profile/actuator/health
-               port: 8080
+               port: 8082
              initialDelaySeconds: 30
              timeoutSeconds: 5 
              periodSeconds: 10
