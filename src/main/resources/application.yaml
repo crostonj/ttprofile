@@ -16,6 +16,16 @@ management:
 spring:
   application:
     name: profile
+  data:
+    mongodb:
+      # uri: mongodb://${MONGO_USERNAME}:${MONGO_PASSWORD}@${MONGO_HOST}:${MONGO_PORT}/techtwist?authSource=admin
+
+      host: ${MONGO_HOST}
+      port: ${MONGO_PORT}
+      username: ${MONGO_USERNAME}
+      password: ${MONGO_PASSWORD}
+      database: techtwist
+      authentication-database: admin # This corresponds to authSource=admin
 
 server:
   port: 8082
@@ -41,16 +51,3 @@ logging:
     # Add these for more insight into MongoDB auto-configuration and driver activity
     boot.autoconfigure.mongo: DEBUG
   com.mongodb.client: DEBUG
-
-# /workspaces/twistproduct/src/main/resources/Application.yaml
-spring:
-  data:
-    mongodb:
-      # uri: mongodb://${MONGO_USERNAME}:${MONGO_PASSWORD}@${MONGO_HOST}:${MONGO_PORT}/techtwist?authSource=admin
-
-      host: ${MONGO_HOST}
-      port: ${MONGO_PORT}
-      username: ${MONGO_USERNAME}
-      password: ${MONGO_PASSWORD}
-      database: techtwist
-      authentication-database: admin # This corresponds to authSource=admin

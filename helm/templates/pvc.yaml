@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: {{ include "twist-product.fullname" . }}-pvc
+  name: {{ include "twist-profile.fullname" . }}-pvc
 spec:
   accessModes:
     - {{ .Values.persistence.accessMode }}
