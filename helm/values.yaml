@@ -21,7 +21,7 @@ serviceAccount:
   annotations: {}
   # The name of the service account to use.
   # If not set and create is true, a name is generated using the fullname template
-  name: "twist-service-account"
+  name: "twist-profile-service-account"
 
 podAnnotations: {}
 
@@ -78,7 +78,7 @@ autoscaling:
   # targetMemoryUtilizationPercentage: 80
 
 persistence:
-  enabled: true
+  enabled: false
   accessMode: ReadWriteOnce
   size: 1Gi
   storageClass: "" # Use "" for default, or specify your storage class

@@ -1,19 +1,28 @@
-FROM openjdk:21-slim
+FROM maven:3.9.6-eclipse-temurin-21 AS build
 
-# Install Maven
-RUN apt-get update && apt-get install -y maven && rm -rf /var/lib/apt/lists/*
-
-# Set the working directory in the container
 WORKDIR /app
 
-# Copy the Maven project files
+# Copy Maven project files and source
 COPY pom.xml .
-
-# Copy the source code
 COPY src ./src
 
-# Package the application
-RUN ["mvn", "clean", "package"]
+# Build the app
+RUN mvn clean package
+
+# Use a Java runtime base image
+FROM eclipse-temurin:17-jre
+
+# Set the working directory
+WORKDIR /app
+
+# Copy the built app from previous stage
+COPY --from=build /app/target/Profile-1.0.jar app.jar
+COPY src/main/resources/Application.yaml /app/Application.yaml
+
+# Expose the port your app runs on
+EXPOSE 8080
+
+ENV SPRING_CONFIG_LOCATION=file:/app/Application.yaml
 
 # Specify the command to run the application
 CMD ["java", "-jar", "target/Profile-1.0.jar"]
