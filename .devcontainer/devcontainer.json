@@ -6,13 +6,10 @@
 	"image": "mcr.microsoft.com/devcontainers/java:1-21-bullseye",
 
 	"features": {
-		"ghcr.io/devcontainers/features/java:1": {
-			"version": "none",
-			"installMaven": "true",
-			"installGradle": "false"
-		},
+		"ghcr.io/devcontainers/features/java:1": {},
 		"ghcr.io/devcontainers/features/azure-cli:1": {},
-		"ghcr.io/devcontainers/features/kubectl-helm-minikube:1": {}
+		"ghcr.io/devcontainers/features/kubectl-helm-minikube:1": {},
+		"ghcr.io/devcontainers/features/docker-in-docker:2": {}
 	}
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
