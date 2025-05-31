@@ -1,0 +1,56 @@
+springdoc:
+  swagger-ui:
+    path: /
+  api-docs:
+    path: /api-docs
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,loggers,env,threaddump
+  endpoint:
+    health:
+      show-details: always
+
+spring:
+  application:
+    name: profile
+
+server:
+  port: 8082
+  servlet:
+    context-path: /profile
+
+service:
+  InMemoryProductService:
+    enabled: false
+
+user:
+  profile:
+    service:
+      qualifier: InMemoryUserProfileService
+      # Or for table storage (when you want to switch)
+      # qualifier: TableUserProfileService
+logging:
+  level:
+    org.springframework:
+      web: DEBUG
+      http.converter.json: TRACE
+      web.client.RestTemplate: DEBUG
+    # Add these for more insight into MongoDB auto-configuration and driver activity
+    boot.autoconfigure.mongo: DEBUG
+  com.mongodb.client: DEBUG
+
+# /workspaces/twistproduct/src/main/resources/Application.yaml
+spring:
+  data:
+    mongodb:
+      # uri: mongodb://${MONGO_USERNAME}:${MONGO_PASSWORD}@${MONGO_HOST}:${MONGO_PORT}/techtwist?authSource=admin
+
+      host: ${MONGO_HOST}
+      port: ${MONGO_PORT}
+      username: ${MONGO_USERNAME}
+      password: ${MONGO_PASSWORD}
+      database: techtwist
+      authentication-database: admin # This corresponds to authSource=admin

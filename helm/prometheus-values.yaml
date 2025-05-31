@@ -1,0 +1,33 @@
+kubeEtcd:
+  enabled: false
+
+kubeControllerManager:
+  enabled: true
+  endpoints: ["192.168.10.40"]
+  service:
+    port: 10257
+    targetPort: 10257
+  serviceMonitor:
+    enabled: true
+    https: false
+
+kubeScheduler:
+  enabled: true
+  endpoints: ["192.168.10.40"]
+  service:
+    port: 10259
+    targetPort: 10259
+  serviceMonitor:
+    enabled: true
+    https: false
+
+prometheus:
+  prometheusSpec:
+    maximumStartupDurationSeconds: 60
+
+grafana:
+  service:
+    type: NodePort
+    nodePort: 32001  # Optional: pick a port or leave it to be assigned
+  
+    

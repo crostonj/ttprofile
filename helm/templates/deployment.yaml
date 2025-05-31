@@ -1,0 +1,95 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "twist-product.fullname" . }}
+  labels:
+    {{- include "twist-product.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "twist-product.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "twist-product.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "twist-product.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ include "twist-product.name" . }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.targetPort }}
+              protocol: TCP
+          livenessProbe:
+             httpGet:
+               path: /product/actuator/health
+               port: 8080
+             initialDelaySeconds: 30
+             timeoutSeconds: 5 
+             periodSeconds: 10
+             failureThreshold: 30
+          # readinessProbe:
+          #   httpGet:
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          env:
+          - name: MONGO_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name:  {{ include "twist-product.fullname" . }}-mongo-secret
+                key: MONGO_USERNAME
+          - name: MONGO_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name:  {{ include "twist-product.fullname" . }}-mongo-secret
+                key: MONGO_PASSWORD
+          - name: MONGO_HOST
+            valueFrom:
+              configMapKeyRef:
+                name: {{ include "twist-product.fullname" . }}-mongo-config
+                key: mongo-host
+          - name: MONGO_PORT
+            valueFrom:
+              configMapKeyRef:
+                name: {{ include "twist-product.fullname" . }}-mongo-config
+                key: mongo-port
+          volumeMounts:
+            {{- if .Values.persistence.enabled }}
+            - name: data
+              mountPath: {{ .Values.persistence.mountPath }}
+            {{- end }}
+      volumes:
+        {{- if .Values.persistence.enabled }}
+        - name: data
+          persistentVolumeClaim:
+            claimName: {{ include "twist-product.fullname" . }}-pvc
+        {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
